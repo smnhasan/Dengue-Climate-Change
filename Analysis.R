@@ -34,29 +34,32 @@ library(GGally)
 library(mgcv)
 library(visreg)
 
-setwd('E:\\Najmul Bhai\\Dengue\\Dengue New')
-Dengue <- read.csv("WeatherData.csv")
+setwd('E:\\ResearchProject\\Najmul Bhai\\Dengue\\Dengue Climate Change')
+Dengue <- read.csv("DengueAndWeatherDataRough2.csv")
 
 #Descriptive
 describe.by(Dengue$DC, Dengue$Year)
 describe(Dengue$DC)
 
-Yearwise <- aggregate(Dengue$DC, by=list(Category=Dengue$Year), FUN=sum)
-Yearwise
-Yearwise <- aggregate(Dengue$DD, by=list(Category=Dengue$Year), FUN=sum)
-Yearwise
+YearwiseDC <- aggregate(Dengue$DC, by=list(Category=Dengue$Year), FUN=sum)
+YearwiseDC
+YearwiseDD <- aggregate(Dengue$DD, by=list(Category=Dengue$Year), FUN=sum)
+YearwiseDD
 
-colnames(Yearwise) <- c("Year","DC")
+YearwiseAvgT <- aggregate(Dengue$AvgT, by=list(Category=Dengue$Year), FUN=mean)
+YearwiseAvgT
+YearwiseRainfall <- aggregate(Dengue$Rainfall, by=list(Category=Dengue$Year), FUN=sum)
+YearwiseRainfall
 
+colnames(YearwiseDC) <- c("Year","DC")
+YearwiseDC
+
+colnames(YearwiseDD) <- c("Year","DD")
+YearwiseDD
 
 df2 <- data.frame(Dengue=rep(c("Cases", "Deaths"), each=23),
-                  Years=rep(c("2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008",
-                         "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017",
-                         "2018", "2019", "2020", "2021", "2022"),2),
-                  Numbers=c(5551, 2430, 6232, 486, 3934, 1048, 2200, 466, 1153, 474, 409, 1359,
-                        671, 1749, 375, 3162, 6060, 2769, 10148, 101354, 1405, 28429, 62522,
-                        0, 0, 0, 10, 13, 4, 11, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0,164, 0, 105, 281)+1)
+                  Years=rep(c(YearwiseDC$Year),2),
+                  Numbers=c(YearwiseDC$DC,YearwiseDD$DD)+1)
 
 # Change the colors manually
 p <- ggplot(data=df2, aes(x=Years, y=Numbers, fill=Dengue)) + scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
@@ -74,19 +77,18 @@ p<- p + scale_fill_brewer(palette="Dark2") + theme(axis.text.x = element_text(an
 p
 
 
-monthwise <- aggregate(Dengue$DC, by=list(Category=Dengue$Month), FUN=mean)
-monthwise
+monthwiseDC <- aggregate(Dengue$DC, by=list(Category=Dengue$Month), FUN=mean)
+monthwiseDC
 
 Dengue$DD[is.na(Dengue$DD)] <- 0
 
-monthwise <- aggregate(Dengue$DD, by=list(Category=Dengue$Month), FUN=mean)
-monthwise
+monthwiseDD <- aggregate(Dengue$DD, by=list(Category=Dengue$Month), FUN=mean)
+monthwiseDD
 
 df2 <- data.frame(Dengue=rep(c("Cases", "Deaths"), each=12),
-                  Months=rep(c("1", "2", "3", "4", "5", "6", 
-                                "7", "8", "9", "10", "11", "12"),2),
-                  Numbers=c(23.57, 7.26, 6.70, 11.17, 30.22, 187.65, 1182.48, 3407.22, 2034.26, 1922.78, 1416.91, 389.17,
-                            0,0,0,0.09,0,0.35,2.65,5.65,4.04,5.39,5.83,1.57)+1)
+                  Months=rep(c(monthwiseDC$Category),2),
+                  Numbers=c(monthwiseDC$x,
+                            monthwiseDD$x)+1)
 
 
 # Change the colors manually
@@ -119,10 +121,46 @@ gridExtra::grid.arrange(p,q)
 dev.off()
 
 
-fYearwise <- Yearwise[which(Yearwise$Year<='2010'), ]
+fYearwiseDC <- YearwiseDC[which(YearwiseDC$Year<='2010'), ]
 
-mean(fYearwise$DC, na.rm = T)
-sd(fYearwise$DC, na.rm = T)
+mean(fYearwiseDC$DC, na.rm = T)
+sd(fYearwiseDC$DC, na.rm = T)
+
+sYearwiseDC <- YearwiseDC[which(YearwiseDC$Year>'2010'), ]
+
+mean(sYearwiseDC$DC, na.rm = T)
+sd(sYearwiseDC$DC, na.rm = T)
+
+fYearwiseDD <- YearwiseDD[which(YearwiseDD$Year<='2010'), ]
+
+mean(fYearwiseDD$DD, na.rm = T)
+sd(fYearwiseDD$DD, na.rm = T)
+
+sYearwiseDD <- YearwiseDD[which(YearwiseDD$Year>'2010'), ]
+
+mean(sYearwiseDD$DD, na.rm = T)
+sd(sYearwiseDD$DD, na.rm = T)
+
+fYearwiseAvgT <- YearwiseAvgT[which(YearwiseAvgT$Category<='2010'), ]
+
+mean(fYearwiseAvgT$x, na.rm = T)
+sd(fYearwiseAvgT$x, na.rm = T)
+
+sYearwiseAvgT <- YearwiseAvgT[which(YearwiseAvgT$Category>'2010'), ]
+
+mean(sYearwiseAvgT$x, na.rm = T)
+sd(sYearwiseAvgT$x, na.rm = T)
+
+fYearwiseRainfall <- YearwiseRainfall[which(YearwiseRainfall$Category<='2010'), ]
+
+mean(fYearwiseRainfall$x, na.rm = T)
+sd(fYearwiseRainfall$x, na.rm = T)
+
+sYearwiseRainfall <- YearwiseRainfall[which(YearwiseRainfall$Category>'2010'), ]
+
+mean(sYearwiseRainfall$x, na.rm = T)
+sd(sYearwiseRainfall$x, na.rm = T)
+
 
 fmonthwise <- Dengue[which(Dengue$Year<='2010'), ]
 NROW(fmonthwise)
@@ -154,17 +192,42 @@ sd(smonthwise$AvgT, na.rm = T)
 mean(smonthwise$Rainfall, na.rm = T)
 sd(smonthwise$Rainfall, na.rm = T)
 
+t.test(fYearwiseDC$DC[1:132], sYearwiseDC$DC[1:132], paired = TRUE, alternative = "two.sided")
+t.test(fYearwiseDD$DD[1:132], sYearwiseDD$DD[1:132], paired = TRUE, alternative = "two.sided")
+t.test(fYearwiseAvgT$x[1:132], sYearwiseAvgT$x[1:132], paired = TRUE, alternative = "two.sided")
+t.test(fYearwiseRainfall$x[1:132], sYearwiseRainfall$x[1:132], paired = TRUE, alternative = "two.sided")
 
-t.test(fmonthwise$DC[1:132], smonthwise$DC[1:132], paired = TRUE, alternative = "two.sided")
-t.test(fmonthwise$DD[1:132], smonthwise$DD[1:132], paired = TRUE, alternative = "two.sided")
-t.test(fmonthwise$AvgT[1:132], smonthwise$AvgT[1:132], paired = TRUE, alternative = "two.sided")
-t.test(fmonthwise$Rainfall[1:132], smonthwise$Rainfall[1:132], paired = TRUE, alternative = "two.sided")
+monthwiseRainfall <- Dengue[which(Dengue$Year<='2010'), ]
+fmonthwiseRainfallsm <- monthwiseRainfall[monthwiseRainfall$Month<7 |monthwiseRainfall$Month>10,]
+smonthwiseRainfallsm <- monthwiseRainfall[monthwiseRainfall$Month>=7 |monthwiseRainfall$Month<=10,]
+
+mean(fmonthwiseRainfallsm$Rainfall)
+sd(fmonthwiseRainfallsm$Rainfall)
+
+mean(smonthwiseRainfallsm$Rainfall)
+sd(smonthwiseRainfallsm$Rainfall)
+
+monthwiseRainfalll <- Dengue[which(Dengue$Year>'2010'), ]
+fmonthwiseRainfallsml <- monthwiseRainfalll[monthwiseRainfalll$Month<7 |monthwiseRainfalll$Month>10,]
+smonthwiseRainfallsml <- monthwiseRainfalll[monthwiseRainfalll$Month>=7 |monthwiseRainfalll$Month<=10,]
+
+mean(fmonthwiseRainfallsml$Rainfall)
+sd(fmonthwiseRainfallsml$Rainfall)
+
+mean(smonthwiseRainfallsml$Rainfall)
+sd(smonthwiseRainfallsml$Rainfall)
+
+
+t.test(fmonthwiseRainfallsm$Rainfall, fmonthwiseRainfallsml$Rainfall[1:88], paired = TRUE, alternative = "two.sided")
+t.test(smonthwiseRainfallsm$Rainfall, smonthwiseRainfallsml$Rainfall[1:132], paired = TRUE, alternative = "two.sided")
+
+t.test(fmonthwiseRainfallsm$Rainfall, smonthwiseRainfallsm$Rainfall[1:88], paired = TRUE, alternative = "two.sided")
+t.test(fmonthwiseRainfallsml$Rainfall, smonthwiseRainfallsml$Rainfall[1:96], paired = TRUE, alternative = "two.sided")
+NROW(smonthwiseRainfallsml$Rainfall)
 
 
 monthwise <- aggregate(Dengue$DC, by=list(Category=Dengue$Month), FUN=min)
 monthwise
-
-
 
 monthwise <- aggregate(Dengue$DC, by=list(Category=Dengue$Month), FUN=sd)
 monthwise
@@ -294,7 +357,7 @@ DengueTS <- ts(YearWiseCase$x, start=c(2000))
 
 auto.arima(DengueTS)
 
-Fit<-Arima(DengueTS,order=c(2,1,0))
+Fit<-Arima(DengueTS,order=c(2,1,0),lambda=0 )
 summary(Fit)
 
 fcast <- forecast(Fit, h=10)
@@ -304,7 +367,8 @@ z <- autoplot(fcast)  + geom_line(size = 1) +
   guides(colour=guide_legend(title="Observed data"),
   fill=guide_legend(title="Prediction interval"))+ theme(legend.position="bottom") + theme_bw()+
   theme( legend.text = element_text(color = "Black", size = 25),
-         text = element_text(size = 25))
+         text = element_text(size = 25))+ scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                                                        labels = trans_format("log10", math_format(10^.x)))
 z
 
 
@@ -338,15 +402,43 @@ dev.off()
 
 #######Count GLM
 
-deng <- data.frame(Dengue$AvgT, Dengue$Rainfall, Dengue$Lag1AvgT, Dengue$Lag2AvgT, Dengue$Lag1Rainfall, Dengue$Lag2Rainfall)
-
-deng <- data.frame(Dengue$AvgT,    Dengue$Lag1Rainfall, Dengue$Lag2Rainfall)
-
-#Dengue$DC[37:274]
+## Dengue - BD data ##
+rm(list=ls())
+library(MASS)
 library(tscount)
+dendat <- read.csv("DengueAndWeatherDataRough2.csv", header=T)  
+dim(dendat)
+head(dendat)
+names(dendat)
+#dendat <- dendat[c(37:276),] # discarding the set of missing values #
 
-fit_pois <- tsglm(Dengue$DC[38:276], xreg = deng[38:276,],  link="identity",
-                      distr="poisson")
+fitglm <- glm(DC ~ AvgT #+ Rainfall #+ Lag1AvgT #+ Lag2AvgT
+              + Lag1Rainfall + Lag2Rainfall, data=dendat, family=poisson(link = "log"))
+summary(fitglm)
+#stepAIC(fitglm)
+cat("IRR for AvgT. = ", exp(fitglm$coefficients[2]))
+cat("IRR for Lag1Rainfall = ", exp(fitglm$coefficients[3]*100))
+cat("IRR for Lag2Rainfall = ", exp(fitglm$coefficients[4]*100))
+
+confint(fitglm)
+exp(confint(fitglm)[2,1:2])
+exp(confint(fitglm)[3,1:2]*100)
+exp(confint(fitglm)[4,1:2]*100)
+
+
+
+
+
+## Analysis using tscount package ##
+attach(dendat)  
+xcov = cbind(AvgT, Rainfall, Lag1AvgT, Lag2AvgT, Lag1Rainfall, Lag2Rainfall, AvgT*Rainfall)
+fittsglm <- tsglm(DC, xreg=xcov, link = "log", distr = "poisson")
+summary(fittsglm)
+
+summary(fittsglm)[5]$coefficient[,1]/summary(fittsglm)[5]$coefficient[,2]
+
+exp(summary(fittsglm)[5]$coefficient[,1])
+
 
 summary(fit_pois)
 coeftest(fit_pois)
@@ -365,3 +457,4 @@ mean(YearWiseCase$x)
 
 MannKendall(myts)
 sens.slope(myts, conf.level = 0.95)
+
