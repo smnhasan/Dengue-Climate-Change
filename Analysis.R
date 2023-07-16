@@ -65,7 +65,7 @@ df2 <- data.frame(Dengue=rep(c("Cases", "Deaths"), each=23),
 p <- ggplot(data=df2, aes(x=Years, y=Numbers, fill=Dengue)) + scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                                                                          labels = trans_format("log10", math_format(10^.x))) + 
   geom_bar(position="dodge", stat="identity")+
-  theme_minimal()+  
+  theme_minimal()+  theme_bw() +
   theme( legend.title=element_blank(),
          legend.text = element_text(color = "Black", size = 25), legend.position = c(0.1, 0.9),
          text = element_text(size = 25))
@@ -96,7 +96,7 @@ q <- ggplot(data=df2, aes(x=Months, y=Numbers, fill=Dengue)) + scale_y_log10(bre
                                                                          labels = trans_format("log10", math_format(10^.x))) +
   geom_bar(position="dodge", stat="identity")+
   
-  theme_minimal() +
+  theme_minimal() + theme_bw() +
   theme( legend.title=element_blank(),
          legend.text = element_text(color = "Black", size = 25), legend.position = c(0.1, 0.9),
          text = element_text(size = 25)) +
@@ -165,6 +165,45 @@ sd(sYearwiseRainfall$x, na.rm = T)
 fmonthwise <- Dengue[which(Dengue$Year<='2010'), ]
 NROW(fmonthwise)
 
+x <- ggplot(fmonthwise, aes(x=as.factor(Month), y=Rainfall)) + 
+  geom_boxplot(fill="slateblue", alpha=0.5) + 
+  ylab("Monthly rainfall (mm)") + xlab("") + ggtitle("Monthly rainfall Dhaka, Bangladesh (2000-2010)") +
+  scale_x_discrete(limits = c("1", "2", "3", 
+                              "4", "5", "6", 
+                              "7", "8", "9", 
+                              "10", "11", "12"),
+                   labels = c("Jan", "Feb", 
+                              "Mar", "Apr", "May", 
+                              "Jun", "Jul",
+                              "Aug", "Sep", 
+                              "Oct", "Nov", "Dec"))+theme(axis.text=element_text(size=12,face="bold"),
+                                                         axis.title=element_text(size=14,face="bold"))+
+  theme(plot.title = element_text(size = 16, face = "bold",hjust = 0.5)
+  )
+fmonthwise <- Dengue[which(Dengue$Year>'2010'), ]
+
+y <- ggplot(fmonthwise, aes(x=as.factor(Month), y=Rainfall)) + 
+  geom_boxplot(fill="slateblue", alpha=0.5) + 
+  ylab("Monthly rainfall (mm)") + xlab("") + ggtitle("Monthly rainfall Dhaka, Bangladesh (2011-2022)") +
+  scale_x_discrete(limits = c("1", "2", "3", 
+                              "4", "5", "6", 
+                              "7", "8", "9", 
+                              "10", "11", "12"),
+                   labels = c("Jan", "Feb", 
+                              "Mar", "Apr", "May", 
+                              "Jun", "Jul",
+                              "Aug", "Sep", 
+                              "Oct", "Nov", "Dec"))+theme(axis.text=element_text(size=12,face="bold"),
+                                                          axis.title=element_text(size=14,face="bold"))+
+  theme(plot.title = element_text(size = 16, face = "bold",hjust = 0.5)
+  )
+y
+
+tiff("box.tiff", units="in", width=12, height=12, res=300)
+gridExtra::grid.arrange(x,y)
+dev.off()
+
+
 mean(fmonthwise$DC, na.rm = T)
 sd(fmonthwise$DC, na.rm = T)
 
@@ -225,6 +264,8 @@ t.test(fmonthwiseRainfallsm$Rainfall, smonthwiseRainfallsm$Rainfall[1:88], paire
 t.test(fmonthwiseRainfallsml$Rainfall, smonthwiseRainfallsml$Rainfall[1:96], paired = TRUE, alternative = "two.sided")
 NROW(smonthwiseRainfallsml$Rainfall)
 
+monthwise <- aggregate(Dengue$DC, by=list(Category=Dengue$Month), FUN=mean)
+monthwise
 
 monthwise <- aggregate(Dengue$DC, by=list(Category=Dengue$Month), FUN=min)
 monthwise
@@ -361,13 +402,13 @@ Fit<-Arima(DengueTS,order=c(2,1,0),lambda=0 )
 summary(Fit)
 
 fcast <- forecast(Fit, h=10)
-
-z <- autoplot(fcast)  + geom_line(size = 1) +
+library(ggfortify)
+z <- autoplot(fcast, size = 2) +
   xlab("Years") + ylab("Number of dengue cases") +ggtitle("ARIMA Model")+
   guides(colour=guide_legend(title="Observed data"),
   fill=guide_legend(title="Prediction interval"))+ theme(legend.position="bottom") + theme_bw()+
-  theme( legend.text = element_text(color = "Black", size = 25),
-         text = element_text(size = 25))+ scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+  theme( legend.text = element_text(color = "Black", size = 40),
+         text = element_text(size = 40))+ scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                                                         labels = trans_format("log10", math_format(10^.x)))
 z
 
