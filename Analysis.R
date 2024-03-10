@@ -43,8 +43,13 @@ describe(Dengue$DC)
 
 YearwiseDC <- aggregate(Dengue$DC, by=list(Category=Dengue$Year), FUN=sum)
 YearwiseDC
+describe(YearwiseDC)
+summary(YearwiseDC$x)
 YearwiseDD <- aggregate(Dengue$DD, by=list(Category=Dengue$Year), FUN=sum)
 YearwiseDD
+describe(YearwiseDD)
+summary(YearwiseDD)
+sum(YearwiseDD$x)
 
 YearwiseAvgT <- aggregate(Dengue$AvgT, by=list(Category=Dengue$Year), FUN=mean)
 YearwiseAvgT
@@ -57,7 +62,7 @@ YearwiseDC
 colnames(YearwiseDD) <- c("Year","DD")
 YearwiseDD
 
-df2 <- data.frame(Dengue=rep(c("Cases", "Deaths"), each=23),
+df2 <- data.frame(Dengue=rep(c("Cases", "Deaths"), each=24),
                   Years=rep(c(YearwiseDC$Year),2),
                   Numbers=c(YearwiseDC$DC,YearwiseDD$DD)+1)
 
@@ -116,8 +121,11 @@ q + scale_fill_manual(values=c('#999999','#E69F00'))
 q <- q + scale_fill_brewer(palette="Dark2")+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 q
 
-tiff("DCDDM.tiff", units="in", width=18, height=20, res=300)
-gridExtra::grid.arrange(p,q)
+tiff("DCDDM.tiff", units="in", width=12, height=13, res=300)
+
+library(cowplot)
+
+gridExtra::grid.arrange(plot_grid(p, q, labels = "AUTO", ncol = 1, nrow = 2))
 dev.off()
 
 
@@ -125,21 +133,25 @@ fYearwiseDC <- YearwiseDC[which(YearwiseDC$Year<='2010'), ]
 
 mean(fYearwiseDC$DC, na.rm = T)
 sd(fYearwiseDC$DC, na.rm = T)
+summary(fYearwiseDC$DC, na.rm = T)
 
 sYearwiseDC <- YearwiseDC[which(YearwiseDC$Year>'2010'), ]
 
 mean(sYearwiseDC$DC, na.rm = T)
 sd(sYearwiseDC$DC, na.rm = T)
+summary(sYearwiseDC$DC, na.rm = T)
 
 fYearwiseDD <- YearwiseDD[which(YearwiseDD$Year<='2010'), ]
 
 mean(fYearwiseDD$DD, na.rm = T)
 sd(fYearwiseDD$DD, na.rm = T)
+summary(fYearwiseDD$DD, na.rm = T)
 
 sYearwiseDD <- YearwiseDD[which(YearwiseDD$Year>'2010'), ]
 
 mean(sYearwiseDD$DD, na.rm = T)
 sd(sYearwiseDD$DD, na.rm = T)
+summary(sYearwiseDD$DD, na.rm = T)
 
 fYearwiseAvgT <- YearwiseAvgT[which(YearwiseAvgT$Category<='2010'), ]
 
@@ -301,7 +313,7 @@ dev.off()
 #t <- (Dengue$DC +1)/(lag(Dengue$DC)+1)
 t <- Dengue$Gfexp
 options(scipen=999)
-DengueGF <- ts(t[2:276], frequency=12, start=c(2000,1), end=c(2022,12))
+DengueGF <- ts(t[2:276], frequency=12, start=c(2000,2), end=c(2022,12))
 # Plot
 b <- ggseasonplot(DengueGF) + geom_line(size=1) + scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                                               labels = trans_format("log10", math_format(10^.x))) + 
@@ -467,9 +479,6 @@ exp(confint(fitglm)[3,1:2]*100)
 exp(confint(fitglm)[4,1:2]*100)
 
 
-
-
-
 ## Analysis using tscount package ##
 attach(dendat)  
 xcov = cbind(AvgT, Rainfall, Lag1AvgT, Lag2AvgT, Lag1Rainfall, Lag2Rainfall, AvgT*Rainfall)
@@ -496,6 +505,7 @@ myts <- ts(YearWiseCase$x)
 t.test(YearWiseCase$x)$"conf.int"
 mean(YearWiseCase$x)
 
+library(trend)
 MannKendall(myts)
 sens.slope(myts, conf.level = 0.95)
-
+sea.sens.slope(myts)
